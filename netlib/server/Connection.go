@@ -13,10 +13,11 @@ type Connection struct {
 	ConnId uint32
 	//当期链接状态
 	IsClosed bool
-	//当前链接绑定的处理方法api
-	handAPi sInterface.HandelFun
 	//退出的channel
 	ExitChan chan bool
+
+	//当前链接Router
+	Router sInterface.Router
 }
 
 //启动链接
@@ -31,23 +32,28 @@ func (c *Connection) Start() {
 func (c *Connection) StartReader() {
 
 	fmt.Printf("reader is running connId = %d , addr = %s \n", c.ConnId, c.RemoteAddr().String())
-    defer  fmt.Printf( " connId = %d 关闭 \n")
-	defer  c.Stop()
-	for  {
-		buf := make([]byte,512)
-		read, err := c.Conn.Read(buf)
+	defer fmt.Printf(" connId = %d 关闭 \n")
+	defer c.Stop()
+	for {
+		buf := make([]byte, 512)
+		_, err := c.Conn.Read(buf)
 		if err != nil {
-			fmt.Printf(" %d 读取数据错误  v% \n" , c.ConnId,err)
+			fmt.Printf(" %d 读取数据错误  v% \n", c.ConnId, err)
 			continue
 		}
 
-		err = c.handAPi(c.Conn, buf, read)
-		if err != nil {
-			fmt.Println("connId err",err)
-			break
+		req := Request{
+			conn: c,
+			data: buf,
 		}
-	}
+		go func(request *Request) {
+			fmt.Println("Router will run")
+			c.Router.PreHandle(request)
+			c.Router.Handle(request)
+			c.Router.PostHandle(request)
+		}(&req)
 
+	}
 
 }
 
@@ -86,12 +92,12 @@ func (c *Connection) GetConnId() uint32 {
 	return c.ConnId
 }
 
-func NewConnection(conn *net.TCPConn,connId uint32,callFun sInterface.HandelFun) *Connection  {
-	 return  &Connection{
-		 Conn:     conn,
-		 ConnId:   connId,
-		 IsClosed: false,
-		 handAPi:  callFun,
-		 ExitChan: make(chan bool),
-	 }
+func NewConnection(conn *net.TCPConn, connId uint32, router sInterface.Router) *Connection {
+	return &Connection{
+		Conn:     conn,
+		ConnId:   connId,
+		IsClosed: false,
+		Router:   router,
+		ExitChan: make(chan bool),
+	}
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"time"
 )
@@ -14,9 +15,23 @@ func main() {
 		log.Println(err)
 		return
 	}
+	strArray := []string{
+		"a",
+		"b",
+		"c",
+		"d",
+		"e",
+		"f",
+		"g",
+		"h",
+	}
+
+	leng := len(strArray) - 1
 	for {
 
-		dial.Write([]byte("hello word"))
+		int63 := rand.Intn(leng)
+
+		dial.Write([]byte(strArray[int63]))
 
 		rb := make([]byte, 512)
 		read, _ := dial.Read(rb)

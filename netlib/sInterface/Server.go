@@ -7,4 +7,7 @@ type Server interface {
 	Stop()
 	//启动serv
 	Serve()
+
+	//添加路由,给当前服务注册路由
+	AddRouter(Router)
 }

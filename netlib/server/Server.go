@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"netLearn/netlib/sInterface"
 )
 
 type Server struct {
@@ -13,6 +14,8 @@ type Server struct {
 	IPVersion string
 	//端口
 	Port int
+	//路由
+	Router sInterface.Router
 }
 
 //开启服务
@@ -36,16 +39,7 @@ func (s *Server) Start() {
 
 		var cid uint32
 
-		Connection := NewConnection(conn, cid, func(conn *net.TCPConn, bytes []byte, i int) error {
-			fmt.Println("回显回调函数----")
-			if _, err2 := conn.Write(bytes[:i]); err2 != nil {
-				fmt.Println("回显错误")
-
-				return nil
-			}
-
-			return nil
-		})
+		Connection := NewConnection(conn, cid, s.Router)
 		cid++
 		go Connection.Start()
 
@@ -60,8 +54,17 @@ func (s *Server) Stop() {
 
 //运行服务
 func (s *Server) Serve() {
+	if s.Router == nil {
+		fmt.Println("路由未设置,终止..")
+		return
+	}
 	s.Start()
 	select {}
+}
+
+//添加router
+func (s *Server) AddRouter(router sInterface.Router) {
+	s.Router = router
 }
 
 func New(Name string) *Server {
@@ -70,6 +73,7 @@ func New(Name string) *Server {
 		Name:      Name,
 		IPVersion: "tcp4",
 		Port:      8868,
+		Router:    nil,
 	}
 
 }
