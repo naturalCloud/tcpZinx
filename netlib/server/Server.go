@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"netLearn/netlib/sInterface"
+	"netLearn/netlib/util"
 )
 
 type Server struct {
@@ -16,13 +17,15 @@ type Server struct {
 	Port int
 	//路由
 	Router sInterface.Router
+	Host   string
 }
 
 //开启服务
 func (s *Server) Start() {
-	fmt.Println("server will start")
 
-	addr, err := net.ResolveTCPAddr(s.IPVersion, fmt.Sprintf("%s:%d", "127.0.0.1", s.Port))
+	fmt.Printf("server %s Host %s Port %d start",s.Name,s.Host,s.Port)
+
+	addr, err := net.ResolveTCPAddr(s.IPVersion, fmt.Sprintf("%s:%d", s.Host, s.Port))
 
 	if err != nil {
 		log.Fatal(err)
@@ -67,13 +70,14 @@ func (s *Server) AddRouter(router sInterface.Router) {
 	s.Router = router
 }
 
-func New(Name string) *Server {
+func New() *Server {
 
 	return &Server{
-		Name:      Name,
+		Name:      util.ServerConf.Name,
 		IPVersion: "tcp4",
-		Port:      8868,
+		Port:      util.ServerConf.Port,
 		Router:    nil,
+		Host:      util.ServerConf.Host,
 	}
 
 }

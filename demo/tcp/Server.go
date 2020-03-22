@@ -36,7 +36,7 @@ func (p *PingRouter) PostHandle(request sInterface.Request) {
 
 func main() {
 
-	s := server.New("tcp1.00")
+	s := server.New()
 	s.AddRouter(&PingRouter{})
 	s.Serve()
 
