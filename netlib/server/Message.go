@@ -1,17 +1,17 @@
 package server
 
 type Message struct {
-	MessageId  uint32
-	MessageLen uint32
-	Data       []byte
+	MessageId uint32
+	DataLen   uint32
+	Data      []byte
 }
 
 func (m *Message) GetMsgId() uint32 {
 	return m.MessageId
 }
 
-func (m *Message) GetMsgLen() uint32 {
-	return m.MessageLen
+func (m *Message) GetDataLen() uint32 {
+	return m.DataLen
 }
 
 func (m *Message) GetData() []byte {
@@ -27,5 +27,5 @@ func (m *Message) SetData(data []byte) {
 }
 
 func (m *Message) SetDataLen(len uint32) {
-	m.MessageLen = len
+	m.DataLen = len
 }

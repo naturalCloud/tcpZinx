@@ -36,7 +36,7 @@ func (c *Connection) StartReader() {
 	defer fmt.Printf(" connId = %d 关闭 \n")
 	defer c.Stop()
 	for {
-		buf := make([]byte,util.ServerConf.MaxBufSize)
+		buf := make([]byte, util.ServerConf.MaxBufSize)
 		_, err := c.Conn.Read(buf)
 		if err != nil {
 			fmt.Printf(" %d 读取数据错误  v% \n", c.ConnId, err)

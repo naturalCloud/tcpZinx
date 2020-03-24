@@ -6,17 +6,16 @@ import (
 )
 
 type ServerConfig struct {
-	Host string
-	Port int
-	MaxConn uint32
-	Name string
+	Host       string
+	Port       int
+	MaxConn    uint32
+	Name       string
 	MaxBufSize uint32
-
 }
 
-
 var ServerConf *ServerConfig
-func init()  {
+
+func init() {
 	ServerConf = &ServerConfig{
 		Host:    "127.0.0.1",
 		Port:    8889,
@@ -34,4 +33,3 @@ func init()  {
 	}
 
 }
-

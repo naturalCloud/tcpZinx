@@ -19,7 +19,7 @@ type Connection interface {
 
 	Send(data []byte) error
 	//获取当前的链接id
-    GetConnId() uint32
+	GetConnId() uint32
 	//
 }
 

@@ -27,7 +27,6 @@ func main() {
 		rb := make([]byte, 512)
 		read, _ := dial.Read(rb)
 
-
 		fmt.Println("读到服务端消息--", string(rb[:read]))
 
 		time.Sleep(1 * time.Second)
