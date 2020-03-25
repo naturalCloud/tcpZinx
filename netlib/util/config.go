@@ -24,6 +24,7 @@ func init() {
 	}
 	file, err := ioutil.ReadFile("config/speed.json")
 	if err != nil {
+		return
 		panic(err)
 	}
 
