@@ -25,7 +25,7 @@ func (d *DataPack) Pack(msg sInterface.Message) ([]byte, error) {
 	buffer := bytes.NewBuffer([]byte{})
 
 	//写入head 包头数据 数据长度
-	err := binary.Write(buffer, binary.LittleEndian, msg.GetDataLen())
+	err := binary.Write(buffer, binary.LittleEndian, msg.GetMsgLen())
 	if err != nil {
 		return nil, err
 	}

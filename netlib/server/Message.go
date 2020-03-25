@@ -10,7 +10,7 @@ func (m *Message) GetMsgId() uint32 {
 	return m.MessageId
 }
 
-func (m *Message) GetDataLen() uint32 {
+func (m *Message) GetMsgLen() uint32 {
 	return m.DataLen
 }
 
@@ -28,4 +28,13 @@ func (m *Message) SetData(data []byte) {
 
 func (m *Message) SetDataLen(len uint32) {
 	m.DataLen = len
+}
+
+func NewMessage(id uint32,data []byte) *Message  {
+	return &Message{
+		MessageId: id,
+		DataLen:   uint32(len(data)),
+		Data:      data,
+	}
+
 }

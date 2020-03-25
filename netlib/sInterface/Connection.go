@@ -17,7 +17,7 @@ type Connection interface {
 	RemoteAddr() net.Addr
 	//发送数据
 
-	Send(data []byte) error
+	SendMsg(msgId uint32,data []byte) error
 	//获取当前的链接id
 	GetConnId() uint32
 	//

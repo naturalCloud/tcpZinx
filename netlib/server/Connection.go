@@ -1,10 +1,11 @@
 package server
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"net"
 	"netLearn/netlib/sInterface"
-	"netLearn/netlib/util"
 )
 
 type Connection struct {
@@ -36,17 +37,42 @@ func (c *Connection) StartReader() {
 	defer fmt.Printf(" connId = %d 关闭 \n")
 	defer c.Stop()
 	for {
-		buf := make([]byte, util.ServerConf.MaxBufSize)
-		_, err := c.Conn.Read(buf)
+		//buf := make([]byte, util.ServerConf.MaxBufSize)
+		//_, err := c.Conn.Read(buf)
+		//if err != nil {
+		//	fmt.Printf(" %d 读取数据错误  v% \n", c.ConnId, err)
+		//	continue
+		//}
+		dp := NewDataPack()
+		headData := make([]byte, dp.GetHeadLen())
+		_, err := io.ReadFull(c.GetTcpConnection(), headData)
 		if err != nil {
-			fmt.Printf(" %d 读取数据错误  v% \n", c.ConnId, err)
-			continue
+			fmt.Println("read msg error", err)
+			break
 		}
 
+		msg, err := dp.UnPack(headData)
+		if err != nil {
+			fmt.Println("unpack err",err)
+			break
+		}
+
+		var data []byte
+		if msg.GetMsgLen() > 0 {
+			data  = make([]byte,msg.GetMsgLen())
+
+			if _, err := io.ReadFull(c.GetTcpConnection(), data);err != nil {
+				fmt.Println("read msg data error ",err)
+			}
+
+		}
+
+		msg.SetData(data)
 		req := Request{
 			conn: c,
-			data: buf,
+			msg:  msg,
 		}
+
 		go func(request *Request) {
 			fmt.Println("Router will run")
 			c.Router.PreHandle(request)
@@ -83,7 +109,21 @@ func (c *Connection) RemoteAddr() net.Addr {
 }
 
 //发送数据
-func (c *Connection) Send(data []byte) error {
+func (c *Connection) SendMsg(msgId uint32,data []byte) error {
+
+	if c.IsClosed {
+		return  errors.New("connection closed when send msg")
+	}
+	//将数据封包
+	dp := NewDataPack()
+	bmsg, err := dp.Pack(NewMessage(msgId, data)) //二进制数据
+	if err != nil {
+		return errors.New("pack data error")
+	}
+	if _, err := c.GetTcpConnection().Write(bmsg);err !=nil {
+		return  errors.New("send msg error")
+	}
+
 
 	return nil
 }

@@ -6,4 +6,6 @@ type Request interface {
 	GetConn() Connection
 	//获取数据
 	GetData() []byte
+
+	GetMsgId() uint32
 }

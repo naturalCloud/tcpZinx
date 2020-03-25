@@ -38,11 +38,11 @@ func TestDataPack(t *testing.T) {
 					if err != nil {
 						t.Error("unpack error", err)
 					}
-					if msgHead.GetDataLen() > 0 {
+					if msgHead.GetMsgLen() > 0 {
 						//有数据,需要进行二次读取
 						//第二次从conn读取数据,根据head中data len
 						msg := msgHead.(*server.Message)
-						msg.Data = make([]byte, msg.GetDataLen())
+						msg.Data = make([]byte, msg.GetMsgLen())
 						//根据data len 长度再次从io流中读取
 						_, err := io.ReadFull(conn, msg.Data)
 						if err != nil {
@@ -53,7 +53,7 @@ func TestDataPack(t *testing.T) {
 
 					}
 
-					t.Log("--------> recv msgId ", msgHead.GetMsgId(), "data len", msgHead.GetDataLen())
+					t.Log("--------> recv msgId ", msgHead.GetMsgId(), "data len", msgHead.GetMsgLen())
 				}
 
 			}(conn)

@@ -28,7 +28,7 @@ func (p *PingRouter) Handle(request sInterface.Request) {
 //处理之后
 func (p *PingRouter) PostHandle(request sInterface.Request) {
 	fmt.Println("call Router PostHandle...")
-	err := request.GetConn().Send([]byte("over"))
+	err := request.GetConn().SendMsg(4,[]byte("over"))
 	if err != nil {
 		fmt.Println("over err")
 	}
