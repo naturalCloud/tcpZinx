@@ -20,6 +20,8 @@ type Connection struct {
 
 	//当前链接Router
 	Router sInterface.Router
+	//消息管理 msgId 和 对应处理的程序
+	MsgHandler sInterface.MessageHandle
 }
 
 //启动链接
@@ -53,16 +55,16 @@ func (c *Connection) StartReader() {
 
 		msg, err := dp.UnPack(headData)
 		if err != nil {
-			fmt.Println("unpack err",err)
+			fmt.Println("unpack err", err)
 			break
 		}
 
 		var data []byte
 		if msg.GetMsgLen() > 0 {
-			data  = make([]byte,msg.GetMsgLen())
+			data = make([]byte, msg.GetMsgLen())
 
-			if _, err := io.ReadFull(c.GetTcpConnection(), data);err != nil {
-				fmt.Println("read msg data error ",err)
+			if _, err := io.ReadFull(c.GetTcpConnection(), data); err != nil {
+				fmt.Println("read msg data error ", err)
 			}
 
 		}
@@ -73,11 +75,9 @@ func (c *Connection) StartReader() {
 			msg:  msg,
 		}
 
+		//从路由中找到对应的路由处理程序
 		go func(request *Request) {
-			fmt.Println("Router will run")
-			c.Router.PreHandle(request)
-			c.Router.Handle(request)
-			c.Router.PostHandle(request)
+			c.MsgHandler.DoMessageHandle(request)
 		}(&req)
 
 	}
@@ -109,10 +109,10 @@ func (c *Connection) RemoteAddr() net.Addr {
 }
 
 //发送数据
-func (c *Connection) SendMsg(msgId uint32,data []byte) error {
+func (c *Connection) SendMsg(msgId uint32, data []byte) error {
 
 	if c.IsClosed {
-		return  errors.New("connection closed when send msg")
+		return errors.New("connection closed when send msg")
 	}
 	//将数据封包
 	dp := NewDataPack()
@@ -120,10 +120,9 @@ func (c *Connection) SendMsg(msgId uint32,data []byte) error {
 	if err != nil {
 		return errors.New("pack data error")
 	}
-	if _, err := c.GetTcpConnection().Write(bmsg);err !=nil {
-		return  errors.New("send msg error")
+	if _, err := c.GetTcpConnection().Write(bmsg); err != nil {
+		return errors.New("send msg error")
 	}
-
 
 	return nil
 }
@@ -133,12 +132,12 @@ func (c *Connection) GetConnId() uint32 {
 	return c.ConnId
 }
 
-func NewConnection(conn *net.TCPConn, connId uint32, router sInterface.Router) *Connection {
+func NewConnection(conn *net.TCPConn, connId uint32, msgHandler sInterface.MessageHandle) *Connection {
 	return &Connection{
-		Conn:     conn,
-		ConnId:   connId,
-		IsClosed: false,
-		Router:   router,
-		ExitChan: make(chan bool),
+		Conn:       conn,
+		ConnId:     connId,
+		IsClosed:   false,
+		MsgHandler: msgHandler,
+		ExitChan:   make(chan bool),
 	}
 }

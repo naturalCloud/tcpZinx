@@ -15,9 +15,10 @@ type Server struct {
 	IPVersion string
 	//端口
 	Port int
-	//路由
-	Router sInterface.Router
+
 	Host   string
+	//当前消息的Message handler
+	MsgHandler sInterface.MessageHandle
 }
 
 //开启服务
@@ -42,7 +43,7 @@ func (s *Server) Start() {
 
 		var cid uint32
 
-		Connection := NewConnection(conn, cid, s.Router)
+		Connection := NewConnection(conn, cid, s.MsgHandler)
 		cid++
 		go Connection.Start()
 
@@ -57,7 +58,7 @@ func (s *Server) Stop() {
 
 //运行服务
 func (s *Server) Serve() {
-	if s.Router == nil {
+	if s.MsgHandler == nil {
 		fmt.Println("路由未设置,终止..")
 		return
 	}
@@ -66,18 +67,18 @@ func (s *Server) Serve() {
 }
 
 //添加router
-func (s *Server) AddRouter(router sInterface.Router) {
-	s.Router = router
+func (s *Server) AddRouter(msgId uint32, router sInterface.Router) {
+	s.MsgHandler.AddRouterMap(msgId, router)
 }
 
 func New() sInterface.Server {
 
 	return &Server{
-		Name:      util.ServerConf.Name,
-		IPVersion: "tcp4",
-		Port:      util.ServerConf.Port,
-		Router:    nil,
-		Host:      util.ServerConf.Host,
+		Name:       util.ServerConf.Name,
+		IPVersion:  "tcp4",
+		Port:       util.ServerConf.Port,
+		Host:       util.ServerConf.Host,
+		MsgHandler: NewMessageHandler(),
 	}
 
 }
