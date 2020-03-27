@@ -17,34 +17,32 @@ type Connection struct {
 	IsClosed bool
 	//退出的channel
 	ExitChan chan bool
+	//读向写协程传递数据的chan
+	MsgChan chan []byte
 
-	//当前链接Router
-	Router sInterface.Router
 	//消息管理 msgId 和 对应处理的程序
 	MsgHandler sInterface.MessageHandle
 }
 
 //启动链接
 func (c *Connection) Start() {
-	fmt.Println("conn start connId ", c.ConnId)
+	fmt.Println("conn start.... connId ", c.ConnId)
 
 	go c.StartReader()
+
+	go c.StartWriter()
 
 }
 
 //读取任务携程
 func (c *Connection) StartReader() {
 
-	fmt.Printf("reader is running connId = %d , addr = %s \n", c.ConnId, c.RemoteAddr().String())
-	defer fmt.Printf(" connId = %d 关闭 \n")
+	fmt.Printf("[reader Gorouting is running] connId = %d , addr = %s \n", c.ConnId, c.RemoteAddr().String())
+	defer fmt.Printf(" [链接 connId = %d 关闭.... \n ]", c.GetConnId())
 	defer c.Stop()
+
 	for {
-		//buf := make([]byte, util.ServerConf.MaxBufSize)
-		//_, err := c.Conn.Read(buf)
-		//if err != nil {
-		//	fmt.Printf(" %d 读取数据错误  v% \n", c.ConnId, err)
-		//	continue
-		//}
+
 		dp := NewDataPack()
 		headData := make([]byte, dp.GetHeadLen())
 		_, err := io.ReadFull(c.GetTcpConnection(), headData)
@@ -65,6 +63,7 @@ func (c *Connection) StartReader() {
 
 			if _, err := io.ReadFull(c.GetTcpConnection(), data); err != nil {
 				fmt.Println("read msg data error ", err)
+				break
 			}
 
 		}
@@ -91,9 +90,11 @@ func (c *Connection) Stop() {
 	if c.IsClosed {
 		return
 	}
+	defer close(c.MsgChan)
 	defer close(c.ExitChan)
 	defer c.Conn.Close()
 	c.IsClosed = true
+	c.ExitChan <- true
 }
 
 //获取当前链接
@@ -120,9 +121,11 @@ func (c *Connection) SendMsg(msgId uint32, data []byte) error {
 	if err != nil {
 		return errors.New("pack data error")
 	}
-	if _, err := c.GetTcpConnection().Write(bmsg); err != nil {
-		return errors.New("send msg error")
-	}
+
+	c.MsgChan <- bmsg
+	//if _, err := c.GetTcpConnection().Write(bmsg); err != nil {
+	//	return errors.New("send msg error")
+	//}
 
 	return nil
 }
@@ -132,6 +135,28 @@ func (c *Connection) GetConnId() uint32 {
 	return c.ConnId
 }
 
+//写数据协程
+func (c *Connection) StartWriter() {
+	fmt.Println("[ writer Goroutine running .......... ]")
+	defer fmt.Printf("[ writer Goroutineing  write exit , 连接id < %s > ]", c.RemoteAddr().String())
+	//不断的阻塞写数据
+	for {
+		select {
+		case data := <-c.MsgChan:
+			//拿到了写的消息
+			if _, err := c.GetTcpConnection().Write(data); err != nil {
+				fmt.Println(" write msg error",err)
+				return
+			}
+		case <-c.ExitChan:
+			//链接已经关闭
+			return
+		}
+
+	}
+
+}
+
 func NewConnection(conn *net.TCPConn, connId uint32, msgHandler sInterface.MessageHandle) *Connection {
 	return &Connection{
 		Conn:       conn,
@@ -139,5 +164,6 @@ func NewConnection(conn *net.TCPConn, connId uint32, msgHandler sInterface.Messa
 		IsClosed:   false,
 		MsgHandler: msgHandler,
 		ExitChan:   make(chan bool),
+		MsgChan:    make(chan []byte),
 	}
 }
