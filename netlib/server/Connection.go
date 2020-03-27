@@ -41,6 +41,7 @@ func (c *Connection) StartReader() {
 	defer fmt.Printf(" [链接 connId = %d 关闭.... \n ]", c.GetConnId())
 	defer c.Stop()
 
+	var requestId uint32
 	for {
 
 		dp := NewDataPack()
@@ -69,15 +70,22 @@ func (c *Connection) StartReader() {
 		}
 
 		msg.SetData(data)
+		requestId += 1
 		req := Request{
-			conn: c,
-			msg:  msg,
+			conn:      c,
+			msg:       msg,
+			requestId: requestId,
 		}
 
-		//从路由中找到对应的路由处理程序
-		go func(request *Request) {
-			c.MsgHandler.DoMessageHandle(request)
-		}(&req)
+		if c.MsgHandler.WorkPoolIsInit() {
+			//协程池初始化完成 将消息发送给协程池
+			c.MsgHandler.SendMsgToTaskQueue(&req)
+		} else {
+			//从路由中找到对应的路由处理程序
+			go func(request *Request) {
+				c.MsgHandler.DoMessageHandle(request)
+			}(&req)
+		}
 
 	}
 
@@ -145,7 +153,7 @@ func (c *Connection) StartWriter() {
 		case data := <-c.MsgChan:
 			//拿到了写的消息
 			if _, err := c.GetTcpConnection().Write(data); err != nil {
-				fmt.Println(" write msg error",err)
+				fmt.Println(" write msg error", err)
 				return
 			}
 		case <-c.ExitChan:

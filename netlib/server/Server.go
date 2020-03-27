@@ -24,8 +24,9 @@ type Server struct {
 //开启服务
 func (s *Server) Start() {
 
-	fmt.Printf("server %s Host %s Port %d start", s.Name, s.Host, s.Port)
+	fmt.Printf("server %s Host %s Port %d start \n", s.Name, s.Host, s.Port)
 
+	s.MsgHandler.StarWorkPool()
 	addr, err := net.ResolveTCPAddr(s.IPVersion, fmt.Sprintf("%s:%d", s.Host, s.Port))
 
 	if err != nil {

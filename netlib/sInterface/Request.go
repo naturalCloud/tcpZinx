@@ -8,4 +8,5 @@ type Request interface {
 	GetData() []byte
 
 	GetMsgId() uint32
+	GetRequestId() uint32
 }

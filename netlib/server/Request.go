@@ -6,7 +6,12 @@ type Request struct {
 	//当前面链接
 	conn sInterface.Connection
 	//客户端请求数据
-	msg  sInterface.Message
+	msg       sInterface.Message
+	requestId uint32 //当前请求的id自增数
+}
+
+func (r *Request) GetRequestId() uint32 {
+	return r.requestId
 }
 
 func (r *Request) GetConn() sInterface.Connection {
