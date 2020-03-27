@@ -16,7 +16,7 @@ type Server struct {
 	//端口
 	Port int
 
-	Host   string
+	Host string
 	//当前消息的Message handler
 	MsgHandler sInterface.MessageHandle
 }
@@ -35,16 +35,15 @@ func (s *Server) Start() {
 
 	tcp, _ := net.ListenTCP(s.IPVersion, addr)
 
+	var cid uint32
 	for {
 		conn, err := tcp.AcceptTCP()
 		if err != nil {
 			log.Println(err, "错误")
 		}
 
-		var cid uint32
-
 		Connection := NewConnection(conn, cid, s.MsgHandler)
-		cid++
+		cid += 1
 		go Connection.Start()
 
 	}
