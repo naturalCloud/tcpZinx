@@ -35,13 +35,16 @@ func (c *Connection) Start() {
 
 	go c.StartWriter()
 
+	//创建链接后调用的hook func
+	c.TcpServer.CallOnConnStart(c)
+
 }
 
 //读取任务携程
 func (c *Connection) StartReader() {
 
 	fmt.Printf("[reader Gorouting is running] connId = %d , addr = %s \n", c.ConnId, c.RemoteAddr().String())
-	defer fmt.Printf(" [链接 connId = %d 关闭.... \n ]", c.GetConnId())
+	defer fmt.Printf(" [链接 connId = %d 关闭....]  \n ", c.GetConnId())
 	defer c.Stop()
 
 	var requestId uint32
@@ -104,6 +107,8 @@ func (c *Connection) Stop() {
 	defer close(c.MsgChan)
 	defer close(c.ExitChan)
 	defer c.Conn.Close()
+	//调用server停止后的 func
+	defer c.TcpServer.CallOnConnStop(c)
 	c.IsClosed = true
 	c.ExitChan <- true
 	//删除链接
@@ -151,7 +156,7 @@ func (c *Connection) GetConnId() uint32 {
 //写数据协程
 func (c *Connection) StartWriter() {
 	fmt.Println("[ writer Goroutine running .......... ]")
-	defer fmt.Printf("[ writer Goroutineing  write exit , 连接id < %s > ]", c.RemoteAddr().String())
+	defer fmt.Printf("[ writer Goroutineing  write exit , 连接id < %s > ] \n", c.RemoteAddr().String())
 	//不断的阻塞写数据
 	for {
 		select {

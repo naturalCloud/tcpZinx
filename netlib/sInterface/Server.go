@@ -12,4 +12,16 @@ type Server interface {
 	AddRouter(uint32, Router)
 	//获取当前链接测管理
 	GetConnMgr() ConnectionManage
+
+	//注册OnConnStart 钩子函数
+	SetOnConnStart(func(connection Connection))
+
+	//注册OnConnStop 钩子函数
+	SetOnConnStop(func(connection Connection))
+
+	//调用 OnConnStart 钩子函数
+	CallOnConnStart(connection Connection)
+
+	//调用 OnConnStop 钩子函数
+	CallOnConnStop(connection Connection)
 }

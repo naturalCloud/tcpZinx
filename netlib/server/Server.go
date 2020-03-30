@@ -22,6 +22,39 @@ type Server struct {
 
 	//server 链接管理模块
 	connMgr sInterface.ConnectionManage
+
+	//server创建后的函数
+	connStart func(connection sInterface.Connection)
+
+	//server 销毁后的函数
+	connStop func(connection sInterface.Connection)
+}
+
+//注册OnConnStart 钩子函数
+func (s *Server) SetOnConnStart(start func(connection sInterface.Connection)) {
+	s.connStart = start
+}
+
+//注册OnConnStop 钩子函数
+func (s *Server) SetOnConnStop(stop func(connection sInterface.Connection)) {
+	s.connStop = stop
+}
+
+//调用 OnConnStart 钩子函数
+func (s *Server) CallOnConnStart(connection sInterface.Connection) {
+	if s.connStart != nil {
+		fmt.Println("-----> Call OnConnStart() ...")
+		s.connStart(connection)
+	}
+}
+
+//调用 OnConnStop 钩子函数
+func (s *Server) CallOnConnStop(connection sInterface.Connection) {
+
+	if s.connStop != nil {
+		fmt.Println("-----> Call OnConnStop() ...")
+		s.connStop(connection)
+	}
 }
 
 //获取链接管理器
