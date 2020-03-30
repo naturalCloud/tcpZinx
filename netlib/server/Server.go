@@ -19,6 +19,14 @@ type Server struct {
 	Host string
 	//当前消息的Message handler
 	MsgHandler sInterface.MessageHandle
+
+	//server 链接管理模块
+	connMgr sInterface.ConnectionManage
+}
+
+//获取链接管理器
+func (s *Server) GetConnMgr() sInterface.ConnectionManage {
+	return s.connMgr
 }
 
 //开启服务
@@ -43,7 +51,17 @@ func (s *Server) Start() {
 			log.Println(err, "错误")
 		}
 
-		Connection := NewConnection(conn, cid, s.MsgHandler)
+		//建立链接超过最大链接数时候丢掉链接
+		if uint32(s.connMgr.Len()) >= util.ServerConf.MaxConn {
+			pack, _ := NewDataPack().Pack(BuildTextMsg(4, "too many Connections"))
+
+			_, _ = conn.Write(pack)
+			_ = conn.Close()
+			fmt.Println("too many Connections ,current connectionLen ---> ", s.connMgr.Len())
+			continue
+		}
+
+		Connection := NewConnection(conn, cid, s.MsgHandler, s)
 		cid += 1
 		go Connection.Start()
 
@@ -53,6 +71,11 @@ func (s *Server) Start() {
 
 //停止服务
 func (s *Server) Stop() {
+
+	//服务资源回收
+	fmt.Println("回收资源开始......")
+	s.connMgr.ClearConn()
+	fmt.Println("回收资源成功......")
 
 }
 
@@ -79,6 +102,7 @@ func New() sInterface.Server {
 		Port:       util.ServerConf.Port,
 		Host:       util.ServerConf.Host,
 		MsgHandler: NewMessageHandler(),
+		connMgr:    NewConnectionManager(),
 	}
 
 }

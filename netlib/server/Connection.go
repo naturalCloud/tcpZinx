@@ -22,6 +22,9 @@ type Connection struct {
 
 	//消息管理 msgId 和 对应处理的程序
 	MsgHandler sInterface.MessageHandle
+
+	//当前链接属于哪个server
+	TcpServer *Server
 }
 
 //启动链接
@@ -103,6 +106,8 @@ func (c *Connection) Stop() {
 	defer c.Conn.Close()
 	c.IsClosed = true
 	c.ExitChan <- true
+	//删除链接
+	c.TcpServer.connMgr.RemoveConn(c)
 }
 
 //获取当前链接
@@ -165,13 +170,18 @@ func (c *Connection) StartWriter() {
 
 }
 
-func NewConnection(conn *net.TCPConn, connId uint32, msgHandler sInterface.MessageHandle) *Connection {
-	return &Connection{
+func NewConnection(conn *net.TCPConn, connId uint32, msgHandler sInterface.MessageHandle, server *Server) *Connection {
+	c := &Connection{
 		Conn:       conn,
 		ConnId:     connId,
 		IsClosed:   false,
 		MsgHandler: msgHandler,
 		ExitChan:   make(chan bool),
 		MsgChan:    make(chan []byte),
+		TcpServer:  server,
 	}
+
+	//添加链接至连接管理map
+	c.TcpServer.GetConnMgr().AddConn(c)
+	return c
 }

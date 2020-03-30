@@ -1,7 +1,7 @@
 {
   "Name": "speed",
   "Port": 8889,
-  "MaxConn": 3,
+  "MaxConn": 200,
   "Host": "127.0.0.1",
   "MaxBufSize" : 512,
   "WorkPoolSize": 20
