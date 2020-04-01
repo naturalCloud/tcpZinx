@@ -12,6 +12,18 @@ import (
 
 func main() {
 
+	for i := 0; i < 150; i++ {
+		go clientRun()
+	}
+
+	select {
+
+	}
+
+
+}
+
+func clientRun() {
 	fmt.Println("client start ...")
 	dial, err := net.Dial("tcp", ":8889")
 	if err != nil {
