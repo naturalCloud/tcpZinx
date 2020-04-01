@@ -17,10 +17,16 @@ type Connection interface {
 	RemoteAddr() net.Addr
 	//发送数据
 
-	SendMsg(msgId uint32,data []byte) error
+	SendMsg(msgId uint32, data []byte) error
 	//获取当前的链接id
 	GetConnId() uint32
+
 	//
+	SetProperty(key string, value interface{})
+
+	GetProperty(key string) (interface{}, error)
+
+	RemoveProperty(key string)
 }
 
 //连处理函数

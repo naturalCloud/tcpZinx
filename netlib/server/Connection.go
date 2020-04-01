@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"netLearn/netlib/sInterface"
+	"sync"
 )
 
 type Connection struct {
@@ -25,6 +26,40 @@ type Connection struct {
 
 	//当前链接属于哪个server
 	TcpServer *Server
+
+	//链接属性
+	property map[string]interface{}
+
+	//属性变更的锁
+	propertyLock sync.RWMutex
+}
+
+//设置锁
+func (c *Connection) SetProperty(key string, value interface{}) {
+	c.propertyLock.Lock()
+
+	defer c.propertyLock.Unlock()
+	c.property[key] = value
+}
+
+//获得属性
+func (c *Connection) GetProperty(key string) (interface{}, error) {
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
+
+	if value, ok := c.property[key]; ok {
+		return value, nil
+	}
+	return nil, errors.New("not found key :" + key)
+}
+
+//移除属性
+func (c *Connection) RemoveProperty(key string) {
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
+	if _, ok := c.property[key]; ok {
+		delete(c.property, key)
+	}
 }
 
 //启动链接
@@ -184,6 +219,7 @@ func NewConnection(conn *net.TCPConn, connId uint32, msgHandler sInterface.Messa
 		ExitChan:   make(chan bool),
 		MsgChan:    make(chan []byte),
 		TcpServer:  server,
+		property:   make(map[string]interface{}),
 	}
 
 	//添加链接至连接管理map
