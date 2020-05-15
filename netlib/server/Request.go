@@ -3,7 +3,7 @@ package server
 import "netLearn/netlib/sInterface"
 
 type Request struct {
-	//当前面链接
+	//当前链接
 	conn sInterface.Connection
 	//客户端请求数据
 	msg       sInterface.Message
