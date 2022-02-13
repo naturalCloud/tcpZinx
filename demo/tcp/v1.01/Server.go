@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"netLearn/netlib/sInterface"
 	"netLearn/netlib/server"
+	"netLearn/netlib/util"
 )
 
 const (
@@ -58,7 +59,7 @@ func (h *HelloRouter) Handle(request sInterface.Request) {
 //	}
 //}
 
-///创建链接之后
+// DoConnectionBegin /创建链接之后
 func DoConnectionBegin(conn sInterface.Connection) {
 	fmt.Println("-----> DoConnectionBegin start ")
 	if err := conn.SendMsg(22, []byte("handshake ok ....")); err != nil {
@@ -70,7 +71,7 @@ func DoConnectionBegin(conn sInterface.Connection) {
 
 }
 
-//链接销毁之后
+// DoConnectionLost 链接销毁之后
 func DoConnectionLost(connection sInterface.Connection) {
 	fmt.Printf("链接 %d  结束 .......... \n", connection.GetConnId())
 	name, _ := connection.GetProperty("Name")
@@ -79,6 +80,9 @@ func DoConnectionLost(connection sInterface.Connection) {
 
 }
 
+func init() {
+	util.Init("/demo/tcp/v1.01")
+}
 func main() {
 
 	s := server.New()

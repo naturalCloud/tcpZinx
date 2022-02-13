@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"netLearn/netlib/sInterface"
 	"netLearn/netlib/server"
+	"netLearn/netlib/util"
 )
 
 const (
@@ -24,7 +25,7 @@ type PingRouter struct {
 //	}
 //}
 
-//处理中
+// Handle 处理中
 func (p *PingRouter) Handle(request sInterface.Request) {
 	fmt.Println("call Router Handle")
 	fmt.Println("recv from client: msgId", request.GetMsgId(), "data ", string(request.GetData()))
@@ -61,8 +62,13 @@ func (h *HelloRouter) Handle(request sInterface.Request) {
 func main() {
 
 	s := server.New()
-	s.AddRouter(Ping,&PingRouter{})
-	s.AddRouter(Hello,&HelloRouter{})
+	s.AddRouter(Ping, &PingRouter{})
+	s.AddRouter(Hello, &HelloRouter{})
 	s.Serve()
+
+}
+
+func init() {
+	util.Init("/demo/tcp/v0.6")
 
 }

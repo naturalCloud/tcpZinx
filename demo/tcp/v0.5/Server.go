@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"netLearn/netlib/sInterface"
 	"netLearn/netlib/server"
+	"netLearn/netlib/util"
 )
 
 type PingRouter struct {
@@ -42,7 +43,12 @@ func (p *PingRouter) Handle(request sInterface.Request) {
 func main() {
 
 	s := server.New()
-	s.AddRouter(32,&PingRouter{})
+	s.AddRouter(32, &PingRouter{})
 	s.Serve()
+
+}
+
+func init() {
+	util.Init("/demo/tcp/v0.5")
 
 }

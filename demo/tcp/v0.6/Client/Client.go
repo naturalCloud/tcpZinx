@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net"
 	"netLearn/netlib/server"
+	"strconv"
 	"time"
 )
 
@@ -30,13 +31,13 @@ func main() {
 		dp := server.NewDataPack()
 		msgId += 1
 
-	   var 	msgid  uint32 = 0
-		if msgId % 2 == 0 {
+		var msgid uint32 = 0
+		if msgId%2 == 0 {
 			msgid = 0
-		}else {
+		} else {
 			msgid = 1
 		}
-		binaryMsg, err := dp.Pack(server.NewMessage( msgid, []byte(string(last))))
+		binaryMsg, err := dp.Pack(server.NewMessage(msgid, []byte(strconv.Itoa(last))))
 		if err != nil {
 			fmt.Println("pack error", err)
 			break

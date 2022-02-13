@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net"
 	"netLearn/netlib/server"
+	"strconv"
 	"time"
 )
 
@@ -29,7 +30,7 @@ func main() {
 		//发送封包数据
 		dp := server.NewDataPack()
 		msgId += 1
-		binaryMsg, err := dp.Pack(server.NewMessage(msgId, []byte(string(last))))
+		binaryMsg, err := dp.Pack(server.NewMessage(msgId, []byte(strconv.Itoa(last))))
 		if err != nil {
 			fmt.Println("pack error", err)
 			break

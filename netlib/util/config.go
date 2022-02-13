@@ -3,6 +3,7 @@ package util
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
 )
 
 type ServerConfig struct {
@@ -18,16 +19,18 @@ type ServerConfig struct {
 
 var ServerConf *ServerConfig
 
-func init() {
+func Init(wdPath string) {
 	ServerConf = &ServerConfig{
 		Host:            "127.0.0.1",
 		Port:            8889,
 		MaxConn:         3,
 		Name:            "test",
 		MaxTaskQueueLen: 1024,
-		WorkPoolSize : 10,
+		WorkPoolSize:    10,
 	}
-	file, err := ioutil.ReadFile("config/speed.json")
+
+	path, err := os.Getwd()
+	file, err := ioutil.ReadFile(path + wdPath + "/config/speed.json")
 	if err != nil {
 		panic(err)
 	}

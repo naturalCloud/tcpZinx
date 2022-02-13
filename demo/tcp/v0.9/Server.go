@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"netLearn/netlib/sInterface"
 	"netLearn/netlib/server"
+	"netLearn/netlib/util"
 )
 
 const (
@@ -85,4 +86,8 @@ func main() {
 
 	s.Serve()
 
+}
+
+func init() {
+	util.Init("/demo/tcp/v0.9")
 }
