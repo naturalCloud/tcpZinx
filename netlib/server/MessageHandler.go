@@ -25,7 +25,6 @@ func (m *MessageHandler) StarWorkPool() {
 
 	if m.WorkPoolSize < 1 {
 		panic("work poolSize < 1 , stop init work pool " )
-		return
 	}
 	for i := 0; i < int(m.WorkPoolSize); i++ {
 		m.TaskWorkQueue[i] = make(chan sInterface.Request, util.ServerConf.MaxTaskQueueLen)

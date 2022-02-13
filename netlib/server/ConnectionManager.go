@@ -38,7 +38,7 @@ func (c *ConnectionManager) RemoveConn(conn sInterface.Connection) {
 		return
 	}
 
-	fmt.Printf("connId %d not found \n")
+	fmt.Printf("connId %d not found \n",conn.GetConnId())
 
 }
 
