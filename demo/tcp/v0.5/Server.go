@@ -42,7 +42,7 @@ func (p *PingRouter) Handle(request sInterface.Request) {
 func main() {
 
 	s := server.New()
-	s.AddRouter(&PingRouter{})
+	s.AddRouter(32,&PingRouter{})
 	s.Serve()
 
 }

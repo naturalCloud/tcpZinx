@@ -24,7 +24,7 @@ func (m *MessageHandler) WorkPoolIsInit() bool {
 func (m *MessageHandler) StarWorkPool() {
 
 	if m.WorkPoolSize < 1 {
-		fmt.Println("work poolSize < 1 , stop init work pool  ")
+		panic("work poolSize < 1 , stop init work pool " )
 		return
 	}
 	for i := 0; i < int(m.WorkPoolSize); i++ {

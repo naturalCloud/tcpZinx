@@ -25,10 +25,10 @@ func init() {
 		MaxConn:         3,
 		Name:            "test",
 		MaxTaskQueueLen: 1024,
+		WorkPoolSize : 10,
 	}
 	file, err := ioutil.ReadFile("config/speed.json")
 	if err != nil {
-		return
 		panic(err)
 	}
 
